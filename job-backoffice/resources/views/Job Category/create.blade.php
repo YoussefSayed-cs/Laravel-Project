@@ -6,9 +6,14 @@
     </x-slot>
 
     <div class="overflow-x-auto p-x p-8 m-10 ">
+
+
         <div class="max-w-7xl mx-auto p-6 bg-white rounded-lg shadow-mid">
             <form action="{{ route('job-categories.store') }}" method="post">
                 @csrf
+
+              
+
                 
                 <div class="mb-4">
                     <label for="name" class="block text-sm font-medium text-gray-700">Category Name</label>
