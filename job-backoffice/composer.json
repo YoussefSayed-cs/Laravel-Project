@@ -20,7 +20,8 @@
         "job/shared": "*",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
-        "pusher/pusher-php-server": "*"
+        "pusher/pusher-php-server": "*",
+        "tymon/jwt-auth": "^2.2"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
