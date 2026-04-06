@@ -17,6 +17,7 @@ class DashboardController extends Controller
 
     $query = job_vacancy::query();
 
+
     // Search only
     if ($search && !$filter) {
         $query->where(function ($q) use ($search) {
