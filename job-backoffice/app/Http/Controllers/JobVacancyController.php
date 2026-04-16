@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+
 use App\Models\company;
 use App\Models\job_category;
 use App\Models\job_vacancy;
- 
 use Illuminate\Http\Request;
-use App\Notifications\JobApplicationSubmitted;
 use App\Http\Requests\JobVacancy\JobVacancyCreateRequest;
-use App\Http\Requests\JobVacancy\JobVacancyUpdateRequest;  
+use App\Http\Requests\JobVacancy\JobVacancyUpdateRequest;
+use Illuminate\Support\Facades\Auth;
 
 
 class JobVacancyController extends Controller
@@ -23,13 +22,13 @@ class JobVacancyController extends Controller
          //Active
         $query=job_vacancy::latest();
 
-        if(auth()->user()->role == 'company-owner')
+        if(Auth::user()->role == 'company-owner')
         {
-            $query->where('companyID',auth()->user()->company->id);
+            $query->where('companyID',Auth::user()->company->id);
         }
-        
+
         //Archive
-        if($request->input('archived') == 'true') 
+        if($request->input('archived') == 'true')
         {
             $query->onlyTrashed();
         }
@@ -54,7 +53,7 @@ class JobVacancyController extends Controller
      */
     public function store(JobVacancyCreateRequest $request)
     {
-        $validated = $request->validated(); 
+        $validated = $request->validated();
         job_vacancy::create( $validated);
         return redirect()->route('job-vacancies.index')->with('success', 'Job vacancy created successfully.');
     }
@@ -84,7 +83,7 @@ class JobVacancyController extends Controller
      */
     public function update(JobVacancyUpdateRequest $request, string $id)
     {
-        
+
         $validated = $request->validated();
         $vacancy = job_vacancy::findOrFail($id);
         $vacancy->update( $validated );
@@ -118,6 +117,6 @@ class JobVacancyController extends Controller
         return redirect()->route('job-vacancies.index',['archived' => 'true'])->with('success', 'Job vacancy restored successfully.');
     }
 
- 
+
 
 }

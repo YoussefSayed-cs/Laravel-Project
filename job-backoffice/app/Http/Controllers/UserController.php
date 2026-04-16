@@ -6,6 +6,7 @@ use App\Models\User;
 use Hash;
 use Illuminate\Http\Request;
 use App\Http\Requests\User\UserupdateRequest;
+use Illuminate\Support\Facades\Hash as FacadesHash;
 
 class UserController extends Controller
 {
@@ -14,8 +15,7 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $query =User::latest();
-
+      $query =User::latest();
 
     $search = $request->search;
      if ($search) {
@@ -23,8 +23,8 @@ class UserController extends Controller
         $q->where('name', 'like', "%$search%")
           ->orWhere('email', 'like', "%$search%");
     });
-    }
 
+}
 
         if( $request->input('archived') == 'true' )
         {
@@ -34,26 +34,9 @@ class UserController extends Controller
         return view("User.index" ,compact("users"));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    
-
-    /**
-     * Show the form for editing the specified resource.
-     */
+        /**
+        * Show the form for creating a new resource.
+        */
     public function edit(string $id)
     {
         $users = User::findOrFail($id);
@@ -67,11 +50,14 @@ class UserController extends Controller
     {
         $users = User::findOrFail($id);
         $users->update([
-            'password' => Hash::make($request->input('password')),
+
+        'password' => FacadesHash::make($request->input('password')),
         ]);
-        
+
+
         return redirect()->route('users.index')->with('success', 'User updated successfully.');
-        
+
+
     }
 
     /**

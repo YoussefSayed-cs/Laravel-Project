@@ -24,7 +24,7 @@ return new class extends Migration
             // Relationships
 
             $table->uuid('companyID');
-            $table->foreign('companyID')->references('id')->on(  'Companies')->onDelete('restrict');
+            $table->foreign('companyID')->references('id')->on('companies')->onDelete('restrict');
 
             $table->uuid('categoryID');  
             $table->foreign('categoryID')->references('id')->on('job_categories')->onDelete('restrict');

@@ -13,19 +13,19 @@
         <div class="flex justify-end items-center space-x-4">
             @if (request()->has('archived') && request()->input('archived') == 'true')
 
-                <!-- Active -->
-                <a href="{{ route('job-categories.index') }}"
-                    class="inline-flex items-center px-4 py-2 bg-black text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2">
-                    Active categories
-                </a>
+            <!-- Active -->
+            <a href="{{ route('job-categories.index') }}"
+                class="inline-flex items-center px-4 py-2 bg-black text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2">
+                Active categories
+            </a>
 
             @else
 
-                <!-- Archived-->
-                <a href="{{ route('job-categories.index', ['archived' => 'true']) }}"
-                    class="inline-flex items-center px-4 py-2 bg-black text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2">
-                    Archived categories
-                </a>
+            <!-- Archived-->
+            <a href="{{ route('job-categories.index', ['archived' => 'true']) }}"
+                class="inline-flex items-center px-4 py-2 bg-black text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2">
+                Archived categories
+            </a>
 
             @endif
 
@@ -46,47 +46,47 @@
 
             <tbody>
                 @foreach ($job_categories as $category)
-                    <tr class="border-b">
-                        <td class="px-6 py-4 text-gray-800 ">{{ $category->emoji}} {{ $category->name }} </td>
-                        <td>
-                            <div class="flex space-x-4">
-                                @if (request()->input('archived') == 'true')
-                                    <!-- Restore Button -->
-                                    <form action="{{ route('job-categories.restore', $category->id) }}" method="POST"
-                                        class="inline-block">
-                                        @csrf
-                                        @method('PUT')
-                                        <button type="submit" class="text-green-500 hover:text-green-700"> Restore </button>
-                                    </form>
+                <tr class="border-b">
+                    <td class="px-6 py-4 text-gray-800 ">{{ $category->emoji}} {{ $category->name }} </td>
+                    <td>
+                        <div class="flex space-x-4">
+                            @if (request()->input('archived') == 'true')
+                            <!-- Restore Button -->
+                            <form action="{{ route('job-categories.restore', $category->id) }}" method="POST"
+                                class="inline-block">
+                                @csrf
+                                @method('PUT')
+                                <button type="submit" class="text-green-500 hover:text-green-700"> Restore </button>
+                            </form>
 
 
-                                @else
-                                    <!-- Edit Button -->
-                                    <a href="{{ route('job-categories.edit', $category->id)}}"
-                                        class="text-blue-500 hover:text-blue-700">✍️Edit</a>
+                            @else
+                            <!-- Edit Button -->
+                            <a href="{{ route('job-categories.edit', $category->id)}}"
+                                class="text-blue-500 hover:text-blue-700">✍️Edit</a>
 
-                                    <!-- Archive button-->
-                                    <form action="{{ route('job-categories.destroy', $category->id) }}" method="post"
-                                        class="inline-block">
-                                        @csrf
-                                        @method('delete')
+                            <!-- Archive button-->
+                            <form action="{{ route('job-categories.destroy', $category->id) }}" method="post"
+                                class="inline-block">
+                                @csrf
+                                @method('delete')
 
-                                        <button type="submit" class="text-orange-500 hover:text-orange-700">🗃️Archive</button>
-                                    </form>
-                                @endif
-
-
-                            </div>
+                                <button type="submit" class="text-orange-500 hover:text-orange-700">🗃️Archive</button>
+                            </form>
+                            @endif
 
 
-                        </td>
-                    </tr>
+                        </div>
+
+
+                    </td>
+                </tr>
 
                 @endforeach
             </tbody>
         </table>
 
-        
+
 
 
 

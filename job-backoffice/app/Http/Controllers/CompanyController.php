@@ -9,29 +9,25 @@ use App\Models\company;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Auth;  // Ensure imported if used elsewhere
 
- 
+
 
 class CompanyController extends Controller
 {
 
     public $industries = [ 'Technology', 'Finance', 'Healthcare', 'Education', 'Retail'] ;
 
-    
- 
-    
-    
     /**
      * Display a listing of the resource.
      */
      public function index(Request $request)
-    {   
+    {
         //Active
         $query=company::latest();
-        
+
         //Archive
-        if($request->input('archived') == 'true') 
+        if($request->input('archived') == 'true')
         {
             $query->onlyTrashed();
         }
@@ -45,8 +41,8 @@ class CompanyController extends Controller
      * Show the form for creating a new resource.
      */
     public function create()
-    {  
-         
+    {
+
         $industries = $this->industries;
         return view('Company.create', compact('industries') );
     }
@@ -57,9 +53,9 @@ class CompanyController extends Controller
     public function store(CompanyCreateRequest  $request)
     {
 
-           
-       
-        $validated = $request->validated(); 
+
+
+        $validated = $request->validated();
         // create owner
         $owner = User::create([
             'name' => $validated['owner_name'],
@@ -68,7 +64,7 @@ class CompanyController extends Controller
             'role' => 'company-owner',
         ]);
 
-        
+
 
         // Return error if owner creation failed
         if (!$owner) {
@@ -82,30 +78,30 @@ class CompanyController extends Controller
             'address' => $validated['address'],
             'industry' => $validated['industry'],
             'website' => $validated['website'] ?? null,
-            'ownerID' => $owner->id,       
+            'ownerID' => $owner->id,
         ]);
 
-        
 
-       
+
+
         return redirect()->route('companies.index')->with('success','Company created successfully');
-        
-        
-     
-        
+
+
+
+
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id = null)
+    public function show(?string $id = null)
     {
 
         $company = $this->getCompany($id);
-       
 
-        //$applications = job_applaction::with('user')->whereIn('jobvacancyID' ,$company->job_vacancy->pluck('id'))->get(); 
-         
+
+        //$applications = job_applaction::with('user')->whereIn('jobvacancyID' ,$company->job_vacancy->pluck('id'))->get();
+
         return view('Company.show' , compact('company'));
 
     }
@@ -113,33 +109,30 @@ class CompanyController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id = null )
+    public function edit(?string $id = null )
     {
 
 
         $company = $this->getCompany($id);
 
         $industries = $this->industries;
-       
+
         return view('Company.edit' , compact('company' ,'industries'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(CompanyupdateRequest $request, string $id = null)
+    public function update(Request $request, ?string $id = null)
     {
 
-        
-        $validated = $request->validated(); 
 
-        if($id)
-        {
-             $companies = company::findOrFail($id);
-        }
-        else
-        {
-            $companies = company::where('ownerID',auth()->user()->id)->first();
+        $validated = $request->validated();
+
+        if ($id) {
+            $companies = company::findOrFail($id);
+        } else {
+            $companies = company::where('ownerID', Auth::user()->id)->first();
         }
 
         // Update company details
@@ -156,26 +149,22 @@ class CompanyController extends Controller
 
         if (!empty($validated['owner_password'])) {
             $ownerData['password'] = Hash::make($validated['owner_password']);
-        } 
+        }
 
         $companies->owner->update($ownerData);
 
-        if(auth()->user()->role == 'company-owner'){
-            return redirect()->route('my-company.show')->with('success','Company update successfully!');
+        if (Auth::user()->role == 'company-owner') {
+            return redirect()->route('my-company.show')->with('success', 'Company update successfully!');
         }
 
-        if($request->query('redirectToList') == 'true') {
-
-             return redirect()->route('companies.index')->with('success','Company updated successfully');
-
-        }
-        else{
-            
+        if ($request->query('redirectToList') == 'true') {
+            return redirect()->route('companies.index')->with('success', 'Company updated successfully');
+        } else {
             return redirect()->route('companies.show', $id)->with('success','Company updated successfully');
         }
-        
-          
-        
+
+
+
 
     }
 
@@ -196,12 +185,12 @@ class CompanyController extends Controller
         return redirect()->route('companies.index' , ['archived' => 'true'])->with('success','Company restored successfully');
     }
 
-    private function getCompany(string $id = null)
+    private function getCompany(string $id)
     {
         if ($id) {
         return company::findOrFail($id);
     }
-      return company::where('ownerID' , auth()->user()->id)->first();
+      return company::where('ownerID' , Auth::user()->id)->first();
     }
 
 

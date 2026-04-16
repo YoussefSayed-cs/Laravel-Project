@@ -7,9 +7,11 @@ use App\Notifications\NewJobApplicationNotification;
 use App\Models\User;
 
 use App\Models\job_application;
+use App\Notifications\newJobApply;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;  // Ensure this is imported
 
-class applicationController extends Controller
+class ApplicationController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -20,9 +22,10 @@ class applicationController extends Controller
         $query = job_application::latest();
 
         // فلترة حسب صاحب الشركة
-        if (auth()->user()->role == 'company-owner') {
+
+        if (Auth::user()->role == 'company-owner') {  // Changed from auth()->user()
             $query->whereHas('jobVacancy', function ($q) {
-                $q->where('companyID', auth()->user()->company->id);
+                $q->where('companyID', Auth::user()->company->id);  // Changed from auth()->user()
             });
         }
 
@@ -78,32 +81,29 @@ class applicationController extends Controller
     }
 
     public function store(Request $request)
-{
-    $jobApplication = job_application::create([
-        'jobVacancyID' => $request->jobVacancyID,
-        'userID'       => auth()->id(),
-        'status'       => 'pending',
-    ]);
+    {
+        $jobApplication = job_application::create([
+            'jobVacancyID' => $request->jobVacancyID,
+            'userID'       => Auth::id(),
+            'status'       => 'pending',
+        ]);
 
-    // صاحب الشركة
-    $owner = $jobApplication
-        ->jobVacancy
-        ->company
-        ->Owner;
+        // Define the user variable
+        $user = Auth::user();
 
-    // إرسال Notification
-    $owner->notify(
-        new NewJobApplicationNotification($jobApplication, route('job-applications.show', $jobApplication->id))
-    );
+        // صاحب الشركة
+        $owner = $jobApplication
+            ->jobVacancy
+            ->company
+            ->Owner;
 
-    return back()->with('success', 'Application sent successfully');
-}
+        // إرسال Notification
+        $owner->notify(
+            new newJobApply($jobApplication, route('job-applications.show', $jobApplication->id), $user, 'Application submitted successfully')
+        );
 
-
-
-
-
-
+        return back()->with('success', 'Application sent successfully');
+    }
 
     /**
      * Remove the specified resource from storage.

@@ -1,34 +1,30 @@
 <?php
 
-namespace App\Http\Middleware;
+    namespace App\Http\Middleware;
 
-use Closure;
-use Illuminate\Container\Attributes\Auth;
-use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
+    use Closure;
+    use Illuminate\Http\Request;
+    use Symfony\Component\HttpFoundation\Response;
+    use Illuminate\Support\Facades\Auth;
 
-class RoleMiddleware
-{
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
-    public function handle(Request $request, Closure $next, ...$roles): Response
+    class RoleMiddleware
     {
-        if (auth()->check())
+        /**
+         * Handle an incoming request.
+         *
+         * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+         */
+        public function handle(Request $request, Closure $next, ...$roles): Response
         {
-            $role = auth()->user()->role;
-            $hasAcess = in_array($role,$roles);
+            if (Auth::check()) {
+                $role = Auth::user()->role;
+                $hasAccess = in_array($role, $roles);
 
-            if(!$hasAcess)
-            {
-                abort(403);
+                if (! $hasAccess) {
+                    abort(403);
+                }
             }
 
+            return $next($request);
         }
-
-        //Has acess
-        return $next($request);
     }
-}

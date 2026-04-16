@@ -1,21 +1,22 @@
 <?php
 
-use App\Http\Controllers\applicationController;
+use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\categoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\JobVacancyController;
 use App\Http\Controllers\UserController;
 use App\Models\job_application;
-use App\Notifications\NewJobApplicationNotification;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;  // Added import for Auth facade
 
 // Middleware: admin + company-owner
 Route::middleware(['auth', 'role:admin,company-owner'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::delete('/notifications/{id}', function ($id) {
-        auth()->user()
+        Auth::user()
             ->notifications()
             ->where('id', $id)
             ->delete();
@@ -25,8 +26,8 @@ Route::middleware(['auth', 'role:admin,company-owner'])->group(function () {
 
     // Mark notification as read
     Route::post('/notifications/{id}/read', function ($id) {
-        $notification = auth()->user()->notifications()->where('id', $id)->first();
-        
+        $notification = Auth::user()->notifications()->where('id', $id)->first();
+
         if ($notification && !$notification->read_at) {
             $notification->markAsRead();
         }
@@ -35,8 +36,8 @@ Route::middleware(['auth', 'role:admin,company-owner'])->group(function () {
     })->name('notifications.read');
 
     // Job Applications
-    Route::resource('job-applications', applicationController::class);
-    Route::put('/job-applications/{id}/restore', [applicationController::class, 'restore'])->name('job-applications.restore');
+    Route::resource('job-applications', ApplicationController::class);
+    Route::put('/job-applications/{id}/restore', [ApplicationController::class, 'restore'])->name('job-applications.restore');
 
     // Job Vacancies
     Route::resource('job-vacancies', JobVacancyController::class);
@@ -44,13 +45,10 @@ Route::middleware(['auth', 'role:admin,company-owner'])->group(function () {
 
     Route::post('/api/job-applications/notify', function (Request $request) {
 
-        $application = job_application::findOrFail($request->applicationID);
+        $application = job_application::findOrFail($request->input('applicationID'));
         $job = $application->jobVacancy;
 
         $owner = $job->company->owner;
-
-      
-
 
         return response()->json(['status' => 'ok']);
     });

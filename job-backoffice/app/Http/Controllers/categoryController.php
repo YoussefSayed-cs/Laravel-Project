@@ -5,9 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests\JobCategory\JobCategoryCreateRequest;
 use App\Http\Requests\JobCategory\JobCategoryupdateRequest;
-
 use App\Models\job_category;
-
 
 class categoryController extends Controller
 {
@@ -15,12 +13,12 @@ class categoryController extends Controller
      * Display a listing of the resource.
      */
     public function index(Request $request)
-    {   
+    {
         //Active
         $query=job_category::latest();
-        
+
         //Archive
-        if($request->input('archived') == 'true') 
+        if($request->input('archived') == 'true')
         {
             $query->onlyTrashed();
         }
@@ -43,14 +41,14 @@ class categoryController extends Controller
      */
     public function store(JobCategoryCreateRequest $request)
     {
-       
-        $validated = $request->validated(); 
+
+        $validated = $request->validated();
         job_category::create($validated);
         return redirect()->route('job-categories.index')->with('success','Job category created successfully');
-        
+
     }
 
-    
+
 
     /**
      * Show the form for editing the specified resource.
@@ -66,9 +64,9 @@ class categoryController extends Controller
      */
     public function update(JobCategoryupdateRequest $request, string $id)
     {
-        $validated = $request->validated(); 
+        $validated = $request->validated();
         $category = job_category::findOrFail($id);
-        $category->update($validated);  
+        $category->update($validated);
         return redirect()->route('job-categories.index')->with('success','Job category updated successfully');
 
     }
