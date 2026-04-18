@@ -56,7 +56,7 @@
             </div>
             <h1 class="font-cormorant text-[42px] leading-[1.15] text-slate-50 font-normal mb-4">
                 Your Control<br>
-                <em class="italic text-indigo-300">Center</em> Awaits
+                <em class="italic text-indigo-300">Center </em> Awaits
             </h1>
             <p class="text-[13px] text-slate-500 leading-[1.75] font-light max-w-[260px]">
                 Manage jobs, companies, and the full hiring pipeline — securely and efficiently.
@@ -109,7 +109,7 @@
                             required
                             autofocus
                             value="{{ old('email') }}"
-                            placeholder="you@shaglani.com"
+                            placeholder="Email"
                             class="w-full h-12 rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-900 placeholder-slate-300 font-light outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 @error('email') border-red-400 focus:border-red-400 focus:ring-red-400/10 @enderror"
                         />
                         <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none">

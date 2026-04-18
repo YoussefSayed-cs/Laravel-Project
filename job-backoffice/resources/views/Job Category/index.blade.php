@@ -1,13 +1,12 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            💼 Job categories {{ request()->input('archived') == 'true' ? '(Archived)' : '' }}
+            Job categories {{ request()->input('archived') == 'true' ? '(Archived)' : '' }}
         </h2>
     </x-slot>
 
 
     <div class="overflow-x-auto p-6">
-
         <x-toast-notification />
 
         <div class="flex justify-end items-center space-x-4">
@@ -89,8 +88,7 @@
 
 
 
-
-
         <div class="mt-4">{{ $job_categories->links() }}</div>
     </div>
+
 </x-app-layout>

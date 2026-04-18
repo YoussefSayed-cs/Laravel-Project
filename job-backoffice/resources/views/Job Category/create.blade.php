@@ -14,7 +14,6 @@
 
               
 
-                
                 <div class="mb-4">
                     <label for="name" class="block text-sm font-medium text-gray-700">Category Name</label>
                     <input type="text" name="name" id="name"
@@ -35,8 +34,8 @@
                         Category</button>
                 </div>
             </form>
-        </div> 
+        </div>
     </div>
- 
+
 
 </x-app-layout>

@@ -15,17 +15,16 @@ class categoryController extends Controller
     public function index(Request $request)
     {
         //Active
-        $query=job_category::latest();
-
+        $query = job_category::latest();
+        
         //Archive
-        if($request->input('archived') == 'true')
-        {
+        if ($request->input('archived') == 'true') {
             $query->onlyTrashed();
         }
 
-        $job_categories=$query->paginate(10)->onEachSide(1);
-        return view('Job Category.index' , compact('job_categories'));
+        $job_categories = $query->paginate(10)->onEachSide(1);
 
+        return view('Job Category.index', compact('job_categories'));
     }
 
     /**
@@ -33,7 +32,7 @@ class categoryController extends Controller
      */
     public function create()
     {
-        return view('Job Category.create' );
+        return view('Job Category.create');
     }
 
     /**
@@ -41,11 +40,9 @@ class categoryController extends Controller
      */
     public function store(JobCategoryCreateRequest $request)
     {
-
         $validated = $request->validated();
         job_category::create($validated);
-        return redirect()->route('job-categories.index')->with('success','Job category created successfully');
-
+        return redirect()->route('job-categories.index')->with('success', 'Job category created successfully');
     }
 
 
@@ -56,7 +53,7 @@ class categoryController extends Controller
     public function edit(string $id)
     {
         $category = job_category::findOrFail($id);
-        return view('Job Category.edit' , compact('category') );
+        return view('Job Category.edit', compact('category'));
     }
 
     /**
@@ -67,8 +64,7 @@ class categoryController extends Controller
         $validated = $request->validated();
         $category = job_category::findOrFail($id);
         $category->update($validated);
-        return redirect()->route('job-categories.index')->with('success','Job category updated successfully');
-
+        return redirect()->route('job-categories.index')->with('success', 'Job category updated successfully');
     }
 
     /**
@@ -78,13 +74,13 @@ class categoryController extends Controller
     {
         $category = job_category::findOrFail($id);
         $category->delete();
-        return redirect()->route('job-categories.index')->with('success','Job category archived successfully');
+        return redirect()->route('job-categories.index')->with('success', 'Job category archived successfully');
     }
 
     public function restore(string $id)
     {
-        $category = job_category::withTrashed()->findOrFail( $id );
+        $category = job_category::withTrashed()->findOrFail($id);
         $category->restore();
-        return redirect()->route('job-categories.index' , ['archived' => 'true'])->with('success','Job category restored successfully');
+        return redirect()->route('job-categories.index', ['archived' => 'true'])->with('success', 'Job category restored successfully');
     }
 }
