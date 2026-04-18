@@ -16,11 +16,13 @@ class categoryController extends Controller
     {
         //Active
         $query = job_category::latest();
-        
+
         //Archive
         if ($request->input('archived') == 'true') {
             $query->onlyTrashed();
         }
+
+        //$query->when($request->input('archived') == 'true', fn($q) => $q->onlyTrashed());
 
         $job_categories = $query->paginate(10)->onEachSide(1);
 
