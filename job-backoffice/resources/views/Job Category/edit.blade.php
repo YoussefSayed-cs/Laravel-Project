@@ -7,7 +7,7 @@
 
     <div class="overflow-x-auto p-x">
         <div class="max-w-5xl mx-auto px p-6 m-5 bg-white rounded-lg shadow-mid">
-            <form action="{{ route('job-categories.update', $category->id) }}" method="POST">
+            <form action="{{ route('job-categories.update', $category->id) }}" method="post">
                 @csrf
                 @method('PUT')
 
