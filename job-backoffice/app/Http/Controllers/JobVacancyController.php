@@ -6,10 +6,11 @@ namespace App\Http\Controllers;
 use App\Models\company;
 use App\Models\job_category;
 use App\Models\job_vacancy;
-use Illuminate\Http\Request;
 use App\Http\Requests\JobVacancy\JobVacancyCreateRequest;
 use App\Http\Requests\JobVacancy\JobVacancyUpdateRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+
 
 
 class JobVacancyController extends Controller
