@@ -60,7 +60,7 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in-up" style="animation-delay: 0.1s;">
-        
+
         {{-- Overview Chart --}}
         <div class="dashboard-card min-h-[400px]">
             <div class="flex items-center justify-between mb-6">
@@ -156,7 +156,7 @@
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
+                maintainAspectRatio: false, 
                 plugins: {
                     legend: { display: false },
                     tooltip: {

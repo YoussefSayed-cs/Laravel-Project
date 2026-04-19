@@ -17,7 +17,7 @@ class job_vacancy extends Model
     protected $keyType = "string";
     public $incrementing = false;
 
-    protected $fillable = 
+    protected $fillable =
     [
         'title', 'description' , 'location' , 'salary' ,'tybe' , 'views_count' ,
           //forign keys
@@ -37,7 +37,7 @@ class job_vacancy extends Model
         ];
     }
 
-    public function Company()
+    public function company()
     {
 
         return $this->belongsTo(company::class ,'companyID','id');
@@ -50,7 +50,7 @@ class job_vacancy extends Model
 
     public function job_application()
     {
-        return $this->hasMany(job_application::class,'jobvacancyID','id');;
+        return $this->hasMany(job_application::class,'jobVacancyID','id');;
     }
 
 

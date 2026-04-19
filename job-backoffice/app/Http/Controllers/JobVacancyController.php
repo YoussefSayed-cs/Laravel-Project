@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-
+use App\Models\job_vacancy;
 use App\Models\company;
 use App\Models\job_category;
-use App\Models\job_vacancy;
 use App\Http\Requests\JobVacancy\JobVacancyCreateRequest;
 use App\Http\Requests\JobVacancy\JobVacancyUpdateRequest;
 use Illuminate\Support\Facades\Auth;
@@ -20,23 +19,21 @@ class JobVacancyController extends Controller
      */
     public function index(Request $request)
     {
-         //Active
-        $query=job_vacancy::latest();
+        //Active
+        $query = job_vacancy::latest();
 
-        if(Auth::user()->role == 'company-owner')
-        {
-            $query->where('companyID',Auth::user()->company->id);
+        // middleware
+        if (Auth::user()->role == 'company-owner') {
+            $query->where('companyID', Auth::user()->company->id);
         }
 
         //Archive
-        if($request->input('archived') == 'true')
-        {
+        if ($request->input('archived') == 'true') {
             $query->onlyTrashed();
         }
 
-        $vacancies=$query->paginate(10)->onEachSide(1);
+        $vacancies = $query->paginate(10)->onEachSide(1);
         return view('Job Vacancy.index', compact('vacancies'));
-
     }
 
     /**
@@ -55,7 +52,7 @@ class JobVacancyController extends Controller
     public function store(JobVacancyCreateRequest $request)
     {
         $validated = $request->validated();
-        job_vacancy::create( $validated);
+        job_vacancy::create($validated);
         return redirect()->route('job-vacancies.index')->with('success', 'Job vacancy created successfully.');
     }
 
@@ -64,10 +61,9 @@ class JobVacancyController extends Controller
      */
     public function show(string $id)
     {
-        $vacancy = job_vacancy::findOrFail($id);
+        $vacancy = job_vacancy::with('job_application')->findOrFail($id);
         return view('Job Vacancy.show', compact('vacancy'));
     }
-
     /**
      * Show the form for editing the specified resource.
      */
@@ -87,18 +83,13 @@ class JobVacancyController extends Controller
 
         $validated = $request->validated();
         $vacancy = job_vacancy::findOrFail($id);
-        $vacancy->update( $validated );
+        $vacancy->update($validated);
 
-        if($request->query('redirectToList') == 'false')
-        {
-             return redirect()->route('job-vacancies.show', $vacancy->id)->with('success','Job vacancy updated successfully');
-        }
-        else
-        {
+        if ($request->query('redirectToList') == 'false') {
+            return redirect()->route('job-vacancies.show', $vacancy->id)->with('success', 'Job vacancy updated successfully');
+        } else {
             return redirect()->route('job-vacancies.index')->with('success', 'Job vacancy updated successfully.');
         }
-
-
     }
 
     /**
@@ -115,9 +106,6 @@ class JobVacancyController extends Controller
     {
         $vacancy = job_vacancy::withTrashed()->findOrFail($id);
         $vacancy->restore();
-        return redirect()->route('job-vacancies.index',['archived' => 'true'])->with('success', 'Job vacancy restored successfully.');
+        return redirect()->route('job-vacancies.index', ['archived' => 'true'])->with('success', 'Job vacancy restored successfully.');
     }
-
-
-
 }

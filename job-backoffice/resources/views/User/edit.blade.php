@@ -1,103 +1,115 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Edit User Password') }}
+        <h2 class="font-semibold text-2xl text-gray-800 leading-tight">
+            Edit User Password
         </h2>
     </x-slot>
 
-    <div class="overflow-x-auto p-x">
-        <div class="max-w-6xl mx-auto p-7 m-5 bg-white rounded-lg shadow-mid">
-            <form
-                action="{{ route('users.update', ['user' => $users->id, 'redirectToList' => request()->query('redirectToList')]) }}"
-                method="post">
+    <div class="p-8">
+        <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
+            <form action="{{ route('users.update', ['user' => $users->id, 'redirectToList' => request()->query('redirectToList')]) }}" method="POST">
                 @csrf
                 @method('PUT')
 
+                <!-- Form Header -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold text-gray-900">User Information</h3>
+                    <p class="text-sm text-gray-600 mt-1">View user details and update password</p>
+                </div>
 
-                <!-- Job Application details -->
-                <div class="mb-4 p-6 bg-gray-50  border border-gray-100  rounded-lg shadow-md">
-                    <h3 class="text-lg font-bold">User Details</h3>
-                    <br>
+                <!-- User Details Section -->
+                <div class="mb-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
+                    <h4 class="text-sm font-bold text-gray-700 uppercase mb-4">User Details</h4>
 
-
+                    <!-- User Name -->
                     <div class="mb-4">
-                        <label for="title" class="block text-sm font-medium text-gray-700">User Name:</label>
-                        <span>{{ $users->name ?? '—' }}</span>
+                        <label class="block text-sm font-semibold text-gray-900 mb-1">Name</label>
+                        <p class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-700">
+                            {{ $users->name ?? '—' }}
+                        </p>
                     </div>
 
+                    <!-- User Email -->
                     <div class="mb-4">
-                        <label for="title" class="block text-sm font-medium text-gray-700">User Email:</label>
-                        <span class="text-black">{{ $users->email ?? '—' }}</span>
+                        <label class="block text-sm font-semibold text-gray-900 mb-1">Email</label>
+                        <p class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-700">
+                            {{ $users->email ?? '—' }}
+                        </p>
                     </div>
 
-                    <div class="mb-4">
-                        <label for="title" class="block text-sm font-medium text-gray-700">User Role:</label>
-                        <span class="text-black">{{ $users->role ?? '—' }}</span>
+                    <!-- User Role -->
+                    <div class="mb-0">
+                        <label class="block text-sm font-semibold text-gray-900 mb-1">Role</label>
+                        <p class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-700">
+                            @if($users->role == 'admin')
+                                <span class="inline-block px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-semibold">👑 Admin</span>
+                            @elseif($users->role == 'company-owner')
+                                <span class="inline-block px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-semibold">🏢 Company Owner</span>
+                            @else
+                                <span class="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">👤 User</span>
+                            @endif
+                        </p>
                     </div>
+                </div>
 
+                <!-- Password Section -->
+                <div class="mb-8">
+                    <label for="password" class="block text-sm font-semibold text-gray-900 mb-2">New Password</label>
+                    <div class="relative" x-data="{ showPassword: false }">
+                        <input
+                            id="password"
+                            name="password"
+                            :type="showPassword ? 'text' : 'password'"
+                            placeholder="Enter new password..."
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-12 {{ $errors->has('password') ? 'border-red-500 focus:ring-red-500' : '' }}"
+                        />
+                        <button
+                            type="button"
+                            @click="showPassword = !showPassword"
+                            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition"
+                        >
+                            <!-- Eye Icon - Closed -->
+                            <svg
+                                x-show="!showPassword"
+                                class="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
 
-
-
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">Change Owner Password</label>
-                        <div class="relative" x-data="{showPassword: false}">
-                            <input id="password" name="password" :type="showPassword ? 'text' : 'password'"
-                                class="block w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                            <button type="button" @click="showPassword = !showPassword"
-                                class="absolute inset-y-0 right-2 flex items-center text-gray-500">
-                                <!--Eye closed-->
-                                <svg x-show="!showPassword" class="w-5 h-5" width="800px" height="800px"
-                                    viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M2.99902 3L20.999 21M9.8433 9.91364C9.32066 10.4536 8.99902 11.1892 8.99902 12C8.99902 13.6569 10.3422 15 11.999 15C12.8215 15 13.5667 14.669 14.1086 14.133M6.49902 6.64715C4.59972 7.90034 3.15305 9.78394 2.45703 12C3.73128 16.0571 7.52159 19 11.9992 19C13.9881 19 15.8414 18.4194 17.3988 17.4184M10.999 5.04939C11.328 5.01673 11.6617 5 11.9992 5C16.4769 5 20.2672 7.94291 21.5414 12C21.2607 12.894 20.8577 13.7338 20.3522 14.5"
-                                        stroke="#000000" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round" />
-                                </svg>
-
-                                <!-- Eye opend -->
-                                <svg x-show="showPassword" class="w-5 h-5" width="800px" height="800px"
-                                    viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M15.0007 12C15.0007 13.6569 13.6576 15 12.0007 15C10.3439 15 9.00073 13.6569 9.00073 12C9.00073 10.3431 10.3439 9 12.0007 9C13.6576 9 15.0007 10.3431 15.0007 12Z"
-                                        stroke="#000000" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round" />
-
-
-                                    <path
-                                        d="M12.0012 5C7.52354 5 3.73326 7.94288 2.45898 12C3.73324 16.0571 7.52354 19 12.0012 19C16.4788 19 20.2691 16.0571 21.5434 12C20.2691 7.94291 16.4788 5 12.0012 5Z"
-                                        stroke="#000000" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round" />
-                                </svg>
-                            </button>
-
-                        </div>
-
-
-                        @error('password')
-                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-
-
-
-                    </div>
-
-
-
-                    <div class="flex justify-end space-x-4">
-
-                        <a href="{{ route('users.index') }}"
-                            class="px-4 py-2 rounded-md text-gray-500 hover:text-gray-700">
-                            Cancel
-                        </a>
-
-                        <button type="submit"
-                            class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focue:ring-2">
-                            Update User Password
+                            <!-- Eye Icon - Open -->
+                            <svg
+                                x-show="showPassword"
+                                class="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-4.803m5.596-3.856a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
                         </button>
                     </div>
+                    @error('password')
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex justify-end gap-3 pt-6 border-t border-gray-200">
+                    <a href="{{ route('users.index') }}"
+                        class="px-6 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-semibold">
+                        Cancel
+                    </a>
+                    <button type="submit"
+                        class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                        Update Password
+                    </button>
+                </div>
             </form>
         </div>
     </div>
-
 
 </x-app-layout>

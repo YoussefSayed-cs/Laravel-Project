@@ -22,19 +22,20 @@ class JobVacancyCreateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            
+            // fields
             'title' => 'required|string|max:255|unique:job_vacancies,title',
             'description' => 'required|string',
             'location' => 'required|string|max:255',
             'salary' => 'required|numeric|min:0',
             'type' => 'required|string|max:50',
+            // relationships
             'categoryID' => 'required|exists:job_categories,id',
             'companyID' => 'required|exists:companies,id',
-            
+
         ];
     }
 
-    public function messages(): array   
+    public function messages(): array
     {
         return [
 
