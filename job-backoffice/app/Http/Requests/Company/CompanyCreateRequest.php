@@ -22,7 +22,7 @@ class CompanyCreateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            
+
             //company details
             'name' => 'required|string|max:255|unique:companies,name',
             'address' => 'required|string|max:255|',
@@ -36,7 +36,7 @@ class CompanyCreateRequest extends FormRequest
         ];
     }
 
-    public function messages(): array   
+    public function messages(): array
     {
         return [
 
@@ -53,8 +53,8 @@ class CompanyCreateRequest extends FormRequest
             'industry.required'=> 'The company industry field is required.',
             'industry.max' => 'The company industry must be less than 255 characters. ',
             'industry.string' => 'The company industry must be a srting. ',
-            
-            
+
+
             'website.url' => 'The company website must be a valid URL. ',
             'website.max' => 'The company website must be less than 255 characters. ',
             'website.string' => 'The company website must be a srting. ',
@@ -71,8 +71,8 @@ class CompanyCreateRequest extends FormRequest
             'owner_password.required'=> 'The owner password field is required.',
             'owner_password.min' => 'The owner password must be at least 8 characters. ',
             'owner_password.string' => 'The owner password must be a string. ',
-            
 
-        ]; 
+
+        ];
     }
 }
