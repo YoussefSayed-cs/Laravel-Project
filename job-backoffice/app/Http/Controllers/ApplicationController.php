@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 
 use App\Models\job_application;
 use App\Notifications\newJobApply;
+use App\Http\Requests\JobCategory\JobApplicationUpdateRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;  // Ensure this is imported
 
@@ -18,7 +19,7 @@ class ApplicationController extends Controller
 
         $query = job_application::latest();
 
-        
+
 
         if (Auth::user()->role == 'company-owner') {  // Changed from auth()->user()
             $query->whereHas('jobVacancy', function ($q) {
@@ -26,12 +27,12 @@ class ApplicationController extends Controller
             });
         }
 
-        // فلترة حسب Job Vacancy لو جاي من إشعار
+        // Filter by job vacancy if provided
         if ($request->has('job')) {
             $query->where('jobVacancyID', $request->input('job'));
         }
 
-        // فلترة الأرشيف
+        //clear archive
         if ($request->input('archived') == 'true') {
             $query->onlyTrashed();
         }
@@ -61,18 +62,17 @@ class ApplicationController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(JobApplicationUpdateRequest $request, string $id)
     {
+        $validated = $request->validated();
+
         $job_application = job_application::findOrFail($id);
+        $job_application->update([$validated]);
 
-        $job_application->update([
-            'status' => $request->input('status')
-        ]);
+        // if ($request->query('redirectToList') == 'false') {
 
-        if ($request->query('redirectToList') == 'false') {
-
-            return redirect()->route('job-applications.show', $job_application->id)->with('success', 'Job application updated successfully.');
-        }
+        //     return redirect()->route('job-applications.show', $job_application->id)->with('success', 'Job application updated successfully.');
+        // }
 
         return redirect()->route('job-applications.index')->with('success', 'Job application updated successfully.');
     }
@@ -87,6 +87,7 @@ class ApplicationController extends Controller
 
         // Define the user variable
         $user = Auth::user();
+
 
         // Company owner
         $owner = $jobApplication->jobVacancy->company->Owner;

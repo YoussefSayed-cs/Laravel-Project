@@ -9,7 +9,7 @@ use App\Http\Controllers\UserController;
 use App\Models\job_application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;  // Added import for Auth facade
+use Illuminate\Support\Facades\Auth;
 
 // Middleware: admin + company-owner
 Route::middleware(['auth', 'role:admin,company-owner'])->group(function () {
@@ -48,7 +48,7 @@ Route::middleware(['auth', 'role:admin,company-owner'])->group(function () {
         $application = job_application::findOrFail($request->input('applicationID'));
         $job = $application->jobVacancy;
 
-        $owner = $job->company->owner;
+        $job->company->owner;
 
         return response()->json(['status' => 'ok']);
     });

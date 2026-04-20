@@ -3,10 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\company;
-use App\Models\User;
 use App\Http\Requests\Company\CompanyCreateRequest;
 use App\Http\Requests\Company\CompanyupdateRequest;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;  // Ensure imported if used elsewhere
 use Illuminate\Http\Request;
 
@@ -47,29 +45,8 @@ class CompanyController extends Controller
      */
     public function store(CompanyCreateRequest  $request)
     {
-
-
-
         $validated = $request->validated();
-
-        // create owner
-        $owner = User::create($validated);
-
-        // Return error if owner creation failed
-        if (!$owner) {
-            return redirect()->route('companies.create')->withErrors('Failed to create owner user. Please try again.');
-        }
-
-        // create company
-        Company::create([
-            'name' => $validated['name'],
-            'address' => $validated['address'],
-            'industry' => $validated['industry'],
-            'website' => $validated['website'] ?? null,
-            'ownerID' => $owner->id,
-        ]);
-
-
+        company::create($validated);
         return redirect()->route('companies.index')->with('success', 'Company created successfully');
     }
 
@@ -79,11 +56,7 @@ class CompanyController extends Controller
     public function show(?string $id = null)
     {
 
-        $company = $this->getCompany($id);
-
-
-        //$applications = job_applaction::with('user')->whereIn('jobvacancyID' ,$company->job_vacancy->pluck('id'))->get();
-
+        $company = $this->myCompany($id);
         return view('Company.show', compact('company'));
     }
 
@@ -93,7 +66,7 @@ class CompanyController extends Controller
     public function edit(?string $id = null)
     {
 
-        $company = $this->getCompany($id);
+        $company = $this->myCompany($id);
 
         $industries = $this->industries;
 
@@ -105,27 +78,9 @@ class CompanyController extends Controller
      */
     public function update(CompanyupdateRequest $request, ?string $id = null)
     {
-
-
         $validated = $request->validated();
-
-        if ($id) {
-            $companies = company::findOrFail($id);
-        } else {
-            $companies = company::where('ownerID', Auth::user()->id)->first();
-        }
-        // Update company details
-        $companies->update($validated);
-
-        // Update owner details if provided
-        $ownerData = [];
-        $ownerData['name'] = $validated['owner_name'];
-
-        if (!empty($validated['owner_password'])) {
-            $ownerData['password'] = Hash::make($validated['owner_password']);
-        }
-
-        $companies->owner->update($ownerData);
+        $company = $this->myCompany($id);
+        $company->update($validated);
 
         if (Auth::user()->role == 'company-owner') {
             return redirect()->route('my-company.show')->with('success', 'Company update successfully!');
@@ -155,11 +110,14 @@ class CompanyController extends Controller
         return redirect()->route('companies.index', ['archived' => 'true'])->with('success', 'Company restored successfully');
     }
 
-    private function getCompany(string $id)
+    private function myCompany(?string $id = null)
     {
         if ($id) {
-            return company::findOrFail($id);
+            return Company::findOrFail($id);
+        } else {
+            return Company::where('ownerID', Auth::user()->id)->first();
         }
-        return company::where('ownerID', Auth::user()->id)->first();
+
+
     }
 }
