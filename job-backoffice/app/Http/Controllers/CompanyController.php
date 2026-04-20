@@ -53,14 +53,7 @@ class CompanyController extends Controller
         $validated = $request->validated();
 
         // create owner
-        $owner = User::create([
-            'name' => $validated['owner_name'],
-            'email' => $validated['owner_email'],
-            'password' => Hash::make($validated['owner_password']),
-            'role' => 'company-owner',
-        ]);
-
-
+        $owner = User::create($validated);
 
         // Return error if owner creation failed
         if (!$owner) {
@@ -121,14 +114,8 @@ class CompanyController extends Controller
         } else {
             $companies = company::where('ownerID', Auth::user()->id)->first();
         }
-
         // Update company details
-        $companies->update([
-            'name' => $validated['name'],
-            'address' => $validated['address'],
-            'industry' => $validated['industry'],
-            'website' => $validated['website'] ?? null,
-        ]);
+        $companies->update($validated);
 
         // Update owner details if provided
         $ownerData = [];

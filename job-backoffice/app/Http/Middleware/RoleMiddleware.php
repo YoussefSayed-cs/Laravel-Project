@@ -16,6 +16,7 @@
          */
         public function handle(Request $request, Closure $next, ...$roles): Response
         {
+            // Check if the user is authenticated and has the required role
             if (Auth::check()) {
                 $role = Auth::user()->role;
                 $hasAccess = in_array($role, $roles);
@@ -24,7 +25,7 @@
                     abort(403);
                 }
             }
-
+            //Has access
             return $next($request);
         }
     }
