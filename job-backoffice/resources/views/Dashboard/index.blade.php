@@ -135,9 +135,9 @@
                 datasets: [{
                     label: 'Total Count',
                     data: [
-                        {{ $analytics['activeUsers'] }},
-                        {{ $analytics['totalJob'] }},
-                        {{ $analytics['totalapplications'] }}
+                        Number("{{ $analytics['activeUsers'] }}"),
+                        Number("{{ $analytics['totalJob'] }}"),
+                        Number("{{ $analytics['totalapplications'] }}")
                     ],
                     backgroundColor: [
                         'rgba(99, 102, 241, 0.8)', // Indigo
@@ -156,7 +156,7 @@
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false, 
+                maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false },
                     tooltip: {
