@@ -2,9 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Notifications\NewJobApplicationNotification;
-
-use App\Models\User;
 
 use App\Models\job_application;
 use App\Notifications\newJobApply;
@@ -18,10 +15,10 @@ class ApplicationController extends Controller
      */
     public function index(Request $request)
     {
-        // الأساس: أحدث التطبيقات أولاً
+
         $query = job_application::latest();
 
-        // فلترة حسب صاحب الشركة
+        
 
         if (Auth::user()->role == 'company-owner') {  // Changed from auth()->user()
             $query->whereHas('jobVacancy', function ($q) {
@@ -91,13 +88,10 @@ class ApplicationController extends Controller
         // Define the user variable
         $user = Auth::user();
 
-        // صاحب الشركة
-        $owner = $jobApplication
-            ->jobVacancy
-            ->company
-            ->Owner;
+        // Company owner
+        $owner = $jobApplication->jobVacancy->company->Owner;
 
-        // إرسال Notification
+        //  send Notification to company owner
         $owner->notify(
             new newJobApply($jobApplication, route('job-applications.show', $jobApplication->id), $user, 'Application submitted successfully')
         );
