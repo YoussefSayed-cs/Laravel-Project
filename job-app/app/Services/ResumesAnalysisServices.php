@@ -5,137 +5,112 @@ namespace App\Services;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
-use Spatie\PdfToText\Pdf;
 
 class ResumesAnalysisServices
 {
+    protected string $baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+
     /**
-     * Extract resume structured data from PDF using DeepSeek
+     * الخطوة الأولى والأهم: استخراج البيانات من الـ CV مباشرة
+     * Gemini 1.5 Flash can read PDF natively via Base64
      */
     public function extractResumeInformation(string $fileUri): array
     {
         try {
-            // 1️⃣ PDF → Text
-            $rawText = $this->extractTextFromPdf($fileUri);
+            // 1️⃣ قراءة الملف من الكلاود وتحويله لـ Base64
+            if (!Storage::disk('cloud')->exists($fileUri)) {
+                throw new \Exception("File not found on cloud storage: $fileUri");
+            }
 
-            // 2️⃣ Call DeepSeek
+            $fileContent = Storage::disk('cloud')->get($fileUri);
+            $base64Pdf = base64_encode($fileContent);
+
+            // 2️⃣ إرسال الـ PDF مباشرة لـ Gemini
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . config('services.deepseek.key'),
-                'Content-Type'  => 'application/json',
-            ])->post(config('services.deepseek.url'), [
-                'model' => 'deepseek-chat',
-                'messages' => [
+                'x-goog-api-key' => config('services.gemini.key'),
+                'Content-Type'   => 'application/json',
+            ])->post($this->baseUrl, [
+                'contents' => [
                     [
-                        'role' => 'system',
-                        'content' =>
-                            'Extract resume info and return ONLY valid JSON with keys:
-                             summary, skills, experience, education.'
-                    ],
-                    [
-                        'role' => 'user',
-                        'content' => $rawText
+                        'parts' => [
+                            ['text' => "Extract the resume details and return ONLY a valid JSON object with these keys: summary (string), skills (array), experience (array), education (array)."],
+                            [
+                                'inlineData' => [
+                                    'mimeType' => 'application/pdf',
+                                    'data' => $base64Pdf
+                                ]
+                            ]
+                        ]
                     ]
                 ],
-                'temperature' => 0.1
+                'generationConfig' => [
+                    'temperature' => 0.1,
+                    'responseMimeType' => 'application/json',
+                ]
             ]);
 
             if (!$response->successful()) {
-                throw new \Exception($response->body());
+                throw new \Exception("Gemini API Error: " . $response->body());
             }
 
-            return json_decode(
-                $response->json('choices.0.message.content'),
-                true
-            );
+            $result = json_decode($response->json('candidates.0.content.parts.0.text'), true);
+
+            return $result ?? $this->emptySchema();
 
         } catch (\Throwable $e) {
-            Log::error('Resume extraction error: ' . $e->getMessage());
-
-            // AI اختياري → ميفشلش الـ apply
-            return [
-                'summary' => '',
-                'skills' => '',
-                'experience' => '',
-                'education' => '',
-            ];
+            Log::error('Resume Extraction Failed: ' . $e->getMessage());
+            return $this->emptySchema();
         }
     }
 
     /**
-     * Analyze resume vs job vacancy using DeepSeek
+     * تحليل الـ CV مقابل الوظيفة المتاحة
      */
-    public function analyzeResume($job_vacancy, $resumeData): array
+    public function analyzeResume($job_vacancy, array $resumeData): array
     {
         try {
-            $jobDetails = [
-                'title' => $job_vacancy->utils,
-                'description' => $job_vacancy->description,
-                'location' => $job_vacancy->location,
-                'type' => $job_vacancy->type,
-                'salary' => $job_vacancy->salary,
-            ];
+            $prompt = "Compare this resume data with the job requirements. Return ONLY JSON with:
+                       'aiGeneratedScore' (0-100) and 'aiGeneratedFeedback' (brief string).
+
+                       Job: " . json_encode([
+                            'title' => $job_vacancy->utils, // تأكد إن الحقل ده صح في الداتابيز عندك
+                            'description' => $job_vacancy->description
+                       ]) . "
+
+                       Resume: " . json_encode($resumeData);
 
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . config('services.deepseek.key'),
-                'Content-Type'  => 'application/json',
-            ])->post(config('services.deepseek.url'), [
-                'model' => 'deepseek-chat',
-                'messages' => [
-                    [
-                        'role' => 'system',
-                        'content' =>
-                            'Return ONLY valid JSON with:
-                             aiGeneratedScore (0-100),
-                             aiGeneratedFeedback (string).'
-                    ],
-                    [
-                        'role' => 'user',
-                        'content' => json_encode([
-                            'job' => $jobDetails,
-                            'resume' => $resumeData
-                        ])
-                    ]
+                'x-goog-api-key' => config('services.gemini.key'),
+                'Content-Type'   => 'application/json',
+            ])->post($this->baseUrl, [
+                'contents' => [
+                    ['parts' => [['text' => $prompt]]]
                 ],
+                'generationConfig' => [
+                    'temperature' => 0.2,
+                    'responseMimeType' => 'application/json',
+                ]
             ]);
 
-            if (!$response->successful()) {
-                throw new \Exception($response->body());
-            }
-
-            return json_decode(
-                $response->json('choices.0.message.content'),
-                true
-            );
+            return json_decode($response->json('candidates.0.content.parts.0.text'), true)
+                   ?? ['aiGeneratedScore' => 0, 'aiGeneratedFeedback' => 'Error in analysis.'];
 
         } catch (\Throwable $e) {
-            Log::error('Resume analysis error: ' . $e->getMessage());
-
-            return [
-                'aiGeneratedScore' => 0,
-                'aiGeneratedFeedback' =>
-                'AI service unavailable. Please try later.',
-            ];
+            Log::error('Resume Analysis Failed: ' . $e->getMessage());
+            return ['aiGeneratedScore' => 0, 'aiGeneratedFeedback' => 'Service unavailable.'];
         }
     }
 
     /**
-     * Extract raw text from PDF
+     * Helper to return consistent structure
      */
-    private function extractTextFromPdf(string $fileUri): string
+    private function emptySchema(): array
     {
-        if (!Storage::disk('cloud')->exists($fileUri)) {
-            throw new \Exception("File not found at: $fileUri");
-        }
-
-        $fileContent = Storage::disk('cloud')->get($fileUri);
-
-        $tempFile = tempnam(sys_get_temp_dir(), 'pdf_');
-        file_put_contents($tempFile, $fileContent);
-
-        $text = Pdf::getText($tempFile);
-
-        unlink($tempFile);
-
-        return $text;
+        return [
+            'summary' => '',
+            'skills' => [],
+            'experience' => [],
+            'education' => [],
+        ];
     }
 }

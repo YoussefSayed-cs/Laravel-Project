@@ -35,10 +35,8 @@ return [
         ],
     ],
 
-    'deepseek' => [
-    'key' => env('DEEPSEEK_API_KEY'),
-    'url' => 'https://api.deepseek.com/chat/completions',
+    'gemini' => [
+    'key' => env('GEMINI_API_KEY'),
 ],
-
 
 ];

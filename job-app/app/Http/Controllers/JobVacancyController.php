@@ -6,10 +6,10 @@ use App\Http\Requests\AbblyJobRequest;
 use App\Models\job_application;
 use App\Models\job_vacancy;
 use App\Models\resume;
-use App\Models\User;
-use App\Notifications\newJobApply;
 use App\Services\ResumesAnalysisServices;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+
 
 class JobVacancyController extends Controller
 {
@@ -29,7 +29,7 @@ class JobVacancyController extends Controller
     public function apply(string $id)
     {
         $job_vacancy = job_vacancy::findOrFail($id);
-        $resumes = auth()->user()->resume;
+        $resumes = Auth::user()->resume;
 
         return view('job-vacancies.apply', compact('job_vacancy', 'resumes'));
     }
@@ -37,15 +37,14 @@ class JobVacancyController extends Controller
     public function processApplications(AbblyJobRequest $request, string $id)
     {
         $job_vacancy = job_vacancy::findOrFail($id);
-
         $resumeID = null;
 
-        // ✅ default structure (مهم جدًا)
+        // ✅ تحديث الهيكل الافتراضي ليتناسب مع رد Gemini (Arrays)
         $extracted = [
             'summary' => '',
-            'skills' => '',
-            'experience' => '',
-            'education' => '',
+            'skills' => [],
+            'experience' => [],
+            'education' => [],
         ];
 
         /*
@@ -54,11 +53,10 @@ class JobVacancyController extends Controller
         |------------------------------------------------------------------
         */
         if (str_starts_with($request->resume_option, 'existing_')) {
-
             $existingId = str_replace('existing_', '', $request->resume_option);
 
             $resume = resume::where('id', $existingId)
-                ->where('userID', auth()->id())
+                ->where('userID', Auth::id())
                 ->first();
 
             if (!$resume) {
@@ -67,11 +65,12 @@ class JobVacancyController extends Controller
 
             $resumeID = $resume->id;
 
+            // التأكد من استرجاع البيانات بصيغة مصفوفة (Array)
             $extracted = [
                 'summary' => $resume->summary ?? '',
-                'skills' => $resume->skills ?? '',
-                'experience' => $resume->experience ?? '',
-                'education' => $resume->education ?? '',
+                'skills' => is_array($resume->skills) ? $resume->skills : json_decode($resume->skills ?? '[]', true),
+                'experience' => is_array($resume->experience) ? $resume->experience : json_decode($resume->experience ?? '[]', true),
+                'education' => is_array($resume->education) ? $resume->education : json_decode($resume->education ?? '[]', true),
             ];
         }
 
@@ -81,88 +80,60 @@ class JobVacancyController extends Controller
         |------------------------------------------------------------------
         */
         elseif ($request->resume_option === 'new_resume') {
-
             $file = $request->file('resume_file');
             $fileName = 'resume_' . time() . '.pdf';
             $path = $file->storeAs('resume', $fileName, 'cloud');
 
-            // ✅ AI extraction (safe)
+            // ✅ استخراج البيانات باستخدام Gemini
             try {
                 $extracted = $this->resumeService->extractResumeInformation($path);
             } catch (\Throwable $e) {
-                Log::warning('AI extraction skipped: ' . $e->getMessage());
+                Log::warning('AI extraction failed: ' . $e->getMessage());
             }
 
             $resume = resume::create([
                 'filename' => $file->getClientOriginalName(),
                 'fileUri' => $path,
-                'userID' => auth()->id(),
-                'contactDetails' => json_encode([
-                    'name' => auth()->user()->name,
-                    'email' => auth()->user()->email,
-                ]),
+                'userID' => Auth::id(),
+                'contactDetails' => [
+                    'name' => Auth::user()->name,
+                    'email' => Auth::user()->email,
+                ],
                 'summary' => $extracted['summary'] ?? '',
-                'skills' => $extracted['skills'] ?? '',
-                'experience' => $extracted['experience'] ?? '',
-                'education' => $extracted['education'] ?? '',
+                'skills' => $extracted['skills'] ?? [],
+                'experience' => $extracted['experience'] ?? [],
+                'education' => $extracted['education'] ?? [],
             ]);
 
             $resumeID = $resume->id;
         }
 
-        else {
-            return back()->withErrors(['resume_option' => 'Choose a resume option']);
-        }
-
         /*
         |------------------------------------------------------------------
-        | AI EVALUATION (OPTIONAL)
+        | AI EVALUATION
         |------------------------------------------------------------------
         */
         try {
+            // نرسل البيانات المستخرجة (سواء كانت من CV قديم أو جديد) للتحليل
             $evaluation = $this->resumeService->analyzeResume($job_vacancy, $extracted);
         } catch (\Throwable $e) {
             Log::warning('AI evaluation skipped: ' . $e->getMessage());
-
             $evaluation = [
                 'aiGeneratedScore' => 0,
-                'aiGeneratedFeedback' =>
-                    'AI evaluation is temporarily unavailable.',
+                'aiGeneratedFeedback' => 'AI evaluation is temporarily unavailable.',
             ];
         }
 
-        $application = job_application::create([
+            job_application::create([
             'status' => 'pending',
             'aiGeneratedScore' => $evaluation['aiGeneratedScore'] ?? 0,
-            'aiGeneratedFeedback' =>
-                $evaluation['aiGeneratedFeedback'] ?? 'No AI feedback',
+            'aiGeneratedFeedback' => $evaluation['aiGeneratedFeedback'] ?? 'No AI feedback',
             'jobVacancyID' => $job_vacancy->id,
             'resumeID' => $resumeID,
-            'userID' => auth()->id(),
+            'userID' => Auth::id(),
         ]);
 
-        /*
-        |------------------------------------------------------------------
-        | NOTIFICATIONS
-        |------------------------------------------------------------------
-        */
-        $notification = new newJobApply(
-            auth()->user(),
-            $job_vacancy,
-            $application,
-            $application->id
-        );
-
-        // Company owner
-        $job_vacancy->company->Owner->notify($notification);
-
-        // Admins
-        User::where('role', 'admin')->each(
-            fn ($admin) => $admin->notify($notification)
-        );
-
-        return redirect()
-            ->route('job-applications.index')
-            ->with('success', 'Application submitted successfully!');
+        return redirect()->route('job-vacancies.show', $job_vacancy->id)
+            ->with('success', 'Your application has been submitted successfully!');
     }
 }
