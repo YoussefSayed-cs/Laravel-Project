@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        
+
 
             User::firstOrCreate(
             ['email' => 'Admin@admin.com'],
@@ -111,4 +111,6 @@ class DatabaseSeeder extends Seeder
             }
         }
     }
+
+       
 }
