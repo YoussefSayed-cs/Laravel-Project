@@ -58,12 +58,7 @@
                     <span class="font-heading font-bold text-2xl tracking-tight text-white">Shagalni</span>
                 </div>
 
-                <!-- Desktop Menu -->
-                <div class="hidden md:flex items-center space-x-8">
-                    <a href="#" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Find Jobs</a>
-                    <a href="#" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Companies</a>
-                    <a href="#" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Salaries</a>
-                </div>
+
 
                 <!-- Auth Buttons -->
                 <div class="hidden md:flex items-center space-x-4">
@@ -75,10 +70,6 @@
                             Sign up
                         </a>
                     @endauth
-                    <div class="h-6 w-px bg-slate-700 mx-2"></div>
-                    <a href="#" class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 bg-slate-800 rounded-xl hover:bg-slate-700 border border-slate-700">
-                        Employers / Post Job
-                    </a>
                 </div>
             </div>
         </div>

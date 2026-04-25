@@ -29,38 +29,7 @@
                     </p>
                 </div>
 
-                <!-- Search Box -->
-                <div x-data="{ show: false }" x-init="setTimeout(() => show = true, 400)">
-                    <div class="glass-card p-3 rounded-2xl md:rounded-full max-w-3xl mx-auto shadow-2xl shadow-brand-500/10"
-                         x-cloak x-show="show" x-transition:enter="transition ease-out duration-700 delay-200" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
-                        <form class="flex flex-col md:flex-row gap-2">
-                            <div class="flex-1 relative flex items-center">
-                                <svg class="w-5 h-5 text-slate-500 absolute left-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                                <input type="text" placeholder="Job title, keyword, or company" class="w-full pl-12 pr-4 py-3.5 bg-transparent border-none focus:ring-0 text-white placeholder-slate-500 font-medium">
-                            </div>
-                            <div class="hidden md:block w-px h-8 bg-slate-700 my-auto"></div>
-                            <div class="flex-1 relative flex items-center">
-                                <svg class="w-5 h-5 text-slate-500 absolute left-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                                <input type="text" placeholder="City or remote" class="w-full pl-12 pr-4 py-3.5 bg-transparent border-none focus:ring-0 text-white placeholder-slate-500 font-medium">
-                            </div>
-                            <button type="button" class="bg-gradient-to-r from-brand-600 to-indigo-600 text-white font-semibold py-3.5 px-8 rounded-xl md:rounded-full hover:shadow-lg hover:shadow-brand-500/30 transition-all hover:-translate-y-0.5">
-                                Search Jobs
-                            </button>
-                        </form>
-                    </div>
-                </div>
-                
-                <!-- Popular tags -->
-                <div x-data="{ show: false }" x-init="setTimeout(() => show = true, 500)">
-                    <div class="mt-6 flex flex-wrap justify-center gap-2 items-center text-sm"
-                         x-cloak x-show="show" x-transition:enter="transition ease-out duration-700 delay-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
-                        <span class="text-slate-400 font-medium">Popular:</span>
-                        <a href="#" class="px-3 py-1 rounded-full bg-slate-800/50 border border-slate-700/50 text-slate-300 hover:border-brand-500/50 hover:text-brand-400 transition backdrop-blur-sm">Remote</a>
-                        <a href="#" class="px-3 py-1 rounded-full bg-slate-800/50 border border-slate-700/50 text-slate-300 hover:border-brand-500/50 hover:text-brand-400 transition backdrop-blur-sm">Software Engineer</a>
-                        <a href="#" class="px-3 py-1 rounded-full bg-slate-800/50 border border-slate-700/50 text-slate-300 hover:border-brand-500/50 hover:text-brand-400 transition backdrop-blur-sm">Product Manager</a>
-                        <a href="#" class="px-3 py-1 rounded-full bg-slate-800/50 border border-slate-700/50 text-slate-300 hover:border-brand-500/50 hover:text-brand-400 transition backdrop-blur-sm">Marketing</a>
-                    </div>
-                </div>
+
             </div>
         </div>
     </div>
