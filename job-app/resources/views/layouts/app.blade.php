@@ -6,23 +6,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Shagalni</title>
+    <title>Shagalni - Dashboard</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%234f46e5%22></rect><text x=%2250%22 y=%2270%22 font-size=%2265%22 font-family=%22Arial, sans-serif%22 font-weight=%22bold%22 text-anchor=%22middle%22 fill=%22white%22>S</text></svg>">
 
     <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800&display=swap" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <style>
+        [x-cloak] { display: none !important; }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, h4, h5, h6, .font-heading { font-family: 'Outfit', sans-serif; }
+        
+        .bg-mesh {
+            background-color: #0B0F19;
+            background-image: 
+                radial-gradient(at 40% 20%, hsla(250,100%,74%,0.08) 0px, transparent 50%),
+                radial-gradient(at 80% 0%, hsla(189,100%,56%,0.08) 0px, transparent 50%),
+                radial-gradient(at 0% 50%, hsla(340,100%,76%,0.08) 0px, transparent 50%);
+        }
+        
+        .glass-card {
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="font-sans antialiased bg-black text-white overflow-x-hidden selection:bg-brand-500 selection:text-white">
+<body class="bg-mesh text-slate-300 overflow-x-hidden selection:bg-brand-500 selection:text-white antialiased">
     
     <!-- Background Gradient Blobs -->
     <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-brand-900/20 rounded-full blur-3xl animate-blob"></div>
-        <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-indigo-900/20 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
-        <div class="absolute bottom-[-10%] left-[20%] w-[500px] h-[500px] bg-purple-900/20 rounded-full blur-3xl animate-blob animation-delay-4000"></div>
+        <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-brand-500/10 rounded-full blur-3xl opacity-50"></div>
+        <div class="absolute bottom-[-10%] right-[10%] w-[400px] h-[400px] bg-indigo-500/10 rounded-full blur-3xl opacity-50"></div>
     </div>
 
     <!-- Content Wrapper -->
