@@ -133,7 +133,8 @@ class JobVacancyController extends Controller
             'userID' => Auth::id(),
         ]);
 
-        return redirect()->route('job-vacancies.show', $job_vacancy->id)
+        return redirect()->route('job-applications.index', $job_vacancy->id)
             ->with('success', 'Your application has been submitted successfully!');
+
     }
 }
