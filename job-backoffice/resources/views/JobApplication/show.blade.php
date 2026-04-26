@@ -83,9 +83,27 @@
                         <tbody class="bg-white divide-y divide-gray-100">
                                 <tr>
                                     <td class="px-6 py-4 ">{{ $job_application->resume->summary ?? '—' }}</td>
-                                    <td class="px-6 py-4">{{ $job_application->resume->skills ?? '—' }}</td>
-                                    <td class="px-6 py-4 ">{{ $job_application->resume->experience ?? '—' }}</td>
-                                    <td class="px-6 py-4">{{ $job_application->resume->education ?? '—' }}</td>
+                                    <td class="px-6 py-4">
+                                        @if(is_array($job_application->resume->skills))
+                                            {{ implode(', ', $job_application->resume->skills) }}
+                                        @else
+                                            {{ $job_application->resume->skills ?? '—' }}
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 ">
+                                        @if(is_array($job_application->resume->experience))
+                                            <pre class="text-xs whitespace-pre-wrap">{{ json_encode($job_application->resume->experience, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                                        @else
+                                            {{ $job_application->resume->experience ?? '—' }}
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        @if(is_array($job_application->resume->education))
+                                            <pre class="text-xs whitespace-pre-wrap">{{ json_encode($job_application->resume->education, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                                        @else
+                                            {{ $job_application->resume->education ?? '—' }}
+                                        @endif
+                                    </td>
                                 </tr>
         
                         </tbody>

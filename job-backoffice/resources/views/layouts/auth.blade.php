@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Shaglani – Back Office</title>
+    <title>Shagalni – Back Office</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%230ea5e9%22></rect><text x=%2250%22 y=%2272%22 font-size=%2265%22 font-family=%22Arial, sans-serif%22 font-weight=%22bold%22 text-anchor=%22middle%22 fill=%22white%22>S</text></svg>">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -40,12 +41,10 @@
 
         {{-- Brand --}}
         <div class="flex items-center gap-3 z-10 relative">
-            <div class="w-[38px] h-[38px] rounded-[10px] bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5 fill-white" viewBox="0 0 24 24">
-                    <path d="M20 6H4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2zM4 8h16v2H4V8zm0 4h6v2H4v-2zm8 0h8v2h-8v-2z"/>
-                </svg>
+            <div class="w-[38px] h-[38px] rounded-[10px] bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center flex-shrink-0 text-white font-bold text-lg shadow-lg shadow-brand-500/20">
+                S
             </div>
-            <span class="font-cormorant text-2xl font-semibold text-slate-100 tracking-wide">Shaglani</span>
+            <span class="font-bold text-2xl text-slate-100 tracking-tight">Shagalni<span class="text-brand-400">.</span></span>
         </div>
 
         {{-- Hero --}}

@@ -9,8 +9,11 @@
             <div class="flex items-center gap-8">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}" class="group">
-                        <x-application-logo class="block h-9 w-auto fill-current text-white group-hover:text-brand-400 transition-colors" />
+                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 group">
+                        <div class="w-9 h-9 bg-gradient-to-br from-brand-500 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-brand-500/20 group-hover:scale-110 transition-transform duration-300">
+                            S
+                        </div>
+                        <span class="font-bold text-xl text-white tracking-tight">Shagalni<span class="text-brand-400">.</span></span>
                     </a>
                 </div>
 

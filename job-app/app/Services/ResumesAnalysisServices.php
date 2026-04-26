@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Http;
 
 class ResumesAnalysisServices
 {
-    protected string $baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+    protected string $baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent';
 
     public function __construct()
     {
@@ -38,7 +38,7 @@ class ResumesAnalysisServices
                 'contents' => [
                     [
                         'parts' => [
-                            ['text' => "Extract resume details into JSON: summary, skills, experience, education."],
+                            ['text' => "Extract resume details and return ONLY a valid JSON object with keys: summary (string), skills (array of strings), experience (array of objects), education (array of objects). No markdown, no explanation."],
                             [
                                 'inlineData' => [
                                     'mimeType' => 'application/pdf',
@@ -49,16 +49,46 @@ class ResumesAnalysisServices
                     ]
                 ],
                 'generationConfig' => [
-                    'responseMimeType' => 'application/json',
+                    'temperature' => 0.1,
                 ]
             ]);
+
+            // Handle Rate Limit (Free Tier)
+            if ($response->status() === 429) {
+                Log::warning('Gemini Rate Limit Hit (Extraction). Sleeping for 15 seconds...');
+                sleep(15);
+                $response = Http::withHeaders([
+                    'x-goog-api-key' => config('services.gemini.key'),
+                    'Content-Type'   => 'application/json',
+                ])->post($this->baseUrl, [
+                    'contents' => [
+                        [
+                            'parts' => [
+                                ['text' => "Extract resume details and return ONLY a valid JSON object with keys: summary (string), skills (array of strings), experience (array of objects), education (array of objects). No markdown, no explanation."],
+                                [
+                                    'inlineData' => [
+                                        'mimeType' => 'application/pdf',
+                                        'data' => $base64Pdf
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ],
+                    'generationConfig' => [
+                        'temperature' => 0.1,
+                    ]
+                ]);
+            }
 
             if ($response->failed()) {
                 Log::error('Gemini Extraction Error: ' . $response->status() . ' ' . $response->body());
                 return $this->emptySchema();
             }
 
-            return json_decode($response->json('candidates.0.content.parts.0.text'), true) ?? $this->emptySchema();
+            $text = $response->json('candidates.0.content.parts.0.text');
+            $text = preg_replace('/```json\s*(.*?)\s*```/is', '$1', $text);
+            $text = preg_replace('/```\s*(.*?)\s*```/is', '$1', $text);
+            return json_decode($text, true) ?? $this->emptySchema();
 
         } catch (\Throwable $e) {
             Log::error('Extraction Failed: ' . $e->getMessage());
@@ -77,9 +107,7 @@ class ResumesAnalysisServices
                 'description' => $job_vacancy->description ?? ''
             ];
 
-            $prompt = "Compare this resume with the job requirements. Return ONLY JSON: {aiGeneratedScore: int(0-100), aiGeneratedFeedback: string}.
-                       Job: " . json_encode($jobInfo) . "
-                       Resume: " . json_encode($resumeData);
+            $prompt = "Compare this resume with the job requirements. Return ONLY a valid JSON object with exactly these keys: {\"aiGeneratedScore\": int between 0-100, \"aiGeneratedFeedback\": string}. No markdown, no code blocks, just raw JSON.\n\nJob: " . json_encode($jobInfo) . "\n\nResume: " . json_encode($resumeData);
 
             $response = Http::withHeaders([
                 'x-goog-api-key' => config('services.gemini.key'),
@@ -90,9 +118,25 @@ class ResumesAnalysisServices
                 ],
                 'generationConfig' => [
                     'temperature' => 0.2,
-                    'responseMimeType' => 'application/json',
                 ]
             ]);
+
+            // Handle Rate Limit (Free Tier)
+            if ($response->status() === 429) {
+                Log::warning('Gemini Rate Limit Hit (Analysis). Sleeping for 15 seconds...');
+                sleep(15);
+                $response = Http::withHeaders([
+                    'x-goog-api-key' => config('services.gemini.key'),
+                    'Content-Type'   => 'application/json',
+                ])->post($this->baseUrl, [
+                    'contents' => [
+                        ['parts' => [['text' => $prompt]]]
+                    ],
+                    'generationConfig' => [
+                        'temperature' => 0.2,
+                    ]
+                ]);
+            }
 
             if ($response->failed()) {
                 Log::error('Gemini Analysis Error: ' . $response->status() . ' ' . $response->body());
@@ -100,6 +144,8 @@ class ResumesAnalysisServices
             }
 
             $text = $response->json('candidates.0.content.parts.0.text');
+            $text = preg_replace('/```json\s*(.*?)\s*```/is', '$1', $text);
+            $text = preg_replace('/```\s*(.*?)\s*```/is', '$1', $text);
             return json_decode($text, true) ?? ['aiGeneratedScore' => 0, 'aiGeneratedFeedback' => 'Analysis failed.'];
 
         } catch (\Throwable $e) {

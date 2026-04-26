@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 
 use App\Models\job_application;
 use App\Notifications\newJobApply;
-use App\Http\Requests\JobCategory\JobApplicationUpdateRequest;
+use App\Http\Requests\JobApplication\JobApplicationUpdateRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;  // Ensure this is imported
 
