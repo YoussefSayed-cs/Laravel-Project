@@ -38,6 +38,7 @@ Route::middleware(['auth', 'role:admin,company-owner'])->group(function () {
     // Job Applications
     Route::resource('job-applications', ApplicationController::class);
     Route::put('/job-applications/{id}/restore', [ApplicationController::class, 'restore'])->name('job-applications.restore');
+    Route::get('/job-applications/{id}/resume', [ApplicationController::class, 'viewResume'])->name('job-applications.resume');
 
     // Job Vacancies
     Route::resource('job-vacancies', JobVacancyController::class);

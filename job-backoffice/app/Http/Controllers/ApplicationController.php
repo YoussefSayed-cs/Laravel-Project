@@ -7,7 +7,8 @@ use App\Models\job_application;
 use App\Notifications\newJobApply;
 use App\Http\Requests\JobApplication\JobApplicationUpdateRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;  // Ensure this is imported
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ApplicationController extends Controller
 {
@@ -16,14 +17,11 @@ class ApplicationController extends Controller
      */
     public function index(Request $request)
     {
+        $query = job_application::with(['Owner', 'resume', 'jobVacancy.company'])->latest();
 
-        $query = job_application::latest();
-
-
-
-        if (Auth::user()->role == 'company-owner') {  // Changed from auth()->user()
+        if (Auth::user()->role == 'company-owner') {
             $query->whereHas('jobVacancy', function ($q) {
-                $q->where('companyID', Auth::user()->company->id);  // Changed from auth()->user()
+                $q->where('companyID', Auth::user()->company->id);
             });
         }
 
@@ -46,8 +44,56 @@ class ApplicationController extends Controller
 
     public function show(string $id)
     {
-        $job_application = job_application::withTrashed()->findOrFail($id);
+        $job_application = job_application::withTrashed()
+            ->with(['Owner', 'resume', 'jobVacancy.company'])
+            ->findOrFail($id);
+
+        // company-owner can only view applications for their own company
+        if (Auth::user()->role === 'company-owner') {
+            abort_unless(
+                optional($job_application->jobVacancy?->company)->id === Auth::user()->company?->id,
+                403
+            );
+        }
+
         return view('JobApplication.show', compact('job_application'));
+    }
+
+    /**
+     * Stream / redirect to the resume file stored in cloud storage.
+     */
+    public function viewResume(string $id)
+    {
+        $job_application = job_application::with(['resume', 'jobVacancy.company'])
+            ->withTrashed()
+            ->findOrFail($id);
+
+        // company-owner can only view their own company's applications
+        if (Auth::user()->role === 'company-owner') {
+            abort_unless(
+                optional($job_application->jobVacancy?->company)->id === Auth::user()->company?->id,
+                403
+            );
+        }
+
+        $fileUri = $job_application->resume?->fileUri;
+
+        if (!$fileUri) {
+            abort(404, 'No resume file found for this application.');
+        }
+
+        // Generate a temporary URL (valid 15 minutes) from cloud storage
+        try {
+            $url = Storage::disk('cloud')->temporaryUrl($fileUri, now()->addMinutes(15));
+            return redirect()->away($url);
+        } catch (\Throwable $e) {
+            // Fallback: try direct URL construction
+            $baseUrl = rtrim(config('filesystems.disks.s3.url', ''), '/');
+            if ($baseUrl) {
+                return redirect()->away($baseUrl . '/' . ltrim($fileUri, '/'));
+            }
+            abort(500, 'Could not generate resume URL: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -67,7 +113,7 @@ class ApplicationController extends Controller
         $validated = $request->validated();
 
         $job_application = job_application::findOrFail($id);
-        $job_application->update([$validated]);
+        $job_application->update($validated);
 
         // if ($request->query('redirectToList') == 'false') {
 

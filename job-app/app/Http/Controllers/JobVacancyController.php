@@ -124,7 +124,7 @@ class JobVacancyController extends Controller
             ];
         }
 
-            job_application::create([
+        $jobApplication = job_application::create([
             'status' => 'pending',
             'aiGeneratedScore' => $evaluation['aiGeneratedScore'] ?? 0,
             'aiGeneratedFeedback' => $evaluation['aiGeneratedFeedback'] ?? 'No AI feedback',
@@ -132,6 +132,17 @@ class JobVacancyController extends Controller
             'resumeID' => $resumeID,
             'userID' => Auth::id(),
         ]);
+
+        $owner = $job_vacancy->company->Owner;
+        if ($owner) {
+            $owner->notify(new \App\Notifications\newJobApply(Auth::user(), $job_vacancy, $jobApplication, $jobApplication->id));
+        }
+
+        $admins = \App\Models\User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            if ($owner && $admin->id === $owner->id) continue;
+            $admin->notify(new \App\Notifications\newJobApply(Auth::user(), $job_vacancy, $jobApplication, $jobApplication->id));
+        }
 
         return redirect()->route('job-applications.index', $job_vacancy->id)
             ->with('success', 'Your application has been submitted successfully!');

@@ -17,10 +17,17 @@
                     <p class="text-sm text-gray-500 mb-1"><strong>Job Vacancy:</strong> {{ $job_application->jobVacancy->title ?? '—' }}</p>
                     <p class="text-sm text-gray-500 mb-1"><strong>Company:</strong> {{ $job_application->jobVacancy->company->name ?? '—' }}</p>
                     <p class="text-sm text-gray-500 mb-1"><strong>Status:</strong> <span class="@if($job_application->status == 'accepted') text-green-500 @elseif($job_application->status == 'rejected') text-red-500  @else text-yellow-500 @endif">{{ $job_application->status ?? '—' }}</span></p>
-                    <p class="text-sm text-gray-500"><strong>Resume:</strong>
-                        @if($job_application->resume->fileUri)
-                            <a href="{{ $job_application->resume->fileUri }}" target="_blank" class="text-blue-600 hover:underline">
-                                {{ $job_application->resume->fileUri }}
+                    <p class="text-sm text-gray-500">
+                        <strong>Resume File:</strong>
+                        @if($job_application->resume?->fileUri)
+                            <a href="{{ route('job-applications.resume', $job_application->id) }}"
+                               target="_blank"
+                               class="text-blue-600 hover:underline inline-flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                {{ $job_application->resume->filename ?? 'View Resume' }}
                             </a>
                         @else
                             —
@@ -82,30 +89,64 @@
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-100">
                                 <tr>
-                                    <td class="px-6 py-4 ">{{ $job_application->resume->summary ?? '—' }}</td>
-                                    <td class="px-6 py-4">
-                                        @if(is_array($job_application->resume->skills))
-                                            {{ implode(', ', $job_application->resume->skills) }}
+                                    <td class="px-6 py-4 align-top text-gray-800">{{ $job_application->resume->summary ?? '—' }}</td>
+                                    <td class="px-6 py-4 align-top">
+                                        @if(is_array($job_application->resume?->skills))
+                                            <div class="flex flex-wrap gap-2">
+                                                @foreach($job_application->resume->skills as $skill)
+                                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
+                                                        {{ trim($skill) }}
+                                                    </span>
+                                                @endforeach
+                                            </div>
                                         @else
-                                            {{ $job_application->resume->skills ?? '—' }}
+                                            {{ $job_application->resume?->skills ?? '—' }}
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4 ">
-                                        @if(is_array($job_application->resume->experience))
-                                            <pre class="text-xs whitespace-pre-wrap">{{ json_encode($job_application->resume->experience, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                                    <td class="px-6 py-4 align-top">
+                                        @if(is_array($job_application->resume?->experience) && count($job_application->resume->experience) > 0)
+                                            <ul class="space-y-3">
+                                            @foreach($job_application->resume->experience as $exp)
+                                                <li class="bg-gray-50 p-3 rounded border border-gray-100">
+                                                    <div class="font-semibold text-gray-800">{{ $exp['title'] ?? ($exp['role'] ?? '') }}</div>
+                                                    @if(isset($exp['company']))
+                                                        <div class="text-sm text-gray-600 mb-1">{{ $exp['company'] }}</div>
+                                                    @endif
+                                                    @if(isset($exp['description']))
+                                                        <div class="text-xs text-gray-500 mt-1">{{ $exp['description'] }}</div>
+                                                    @endif
+                                                </li>
+                                            @endforeach
+                                            </ul>
+                                        @elseif(is_string($job_application->resume?->experience))
+                                            {{ $job_application->resume->experience }}
                                         @else
-                                            {{ $job_application->resume->experience ?? '—' }}
+                                            —
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4">
-                                        @if(is_array($job_application->resume->education))
-                                            <pre class="text-xs whitespace-pre-wrap">{{ json_encode($job_application->resume->education, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                                    <td class="px-6 py-4 align-top">
+                                        @if(is_array($job_application->resume?->education) && count($job_application->resume->education) > 0)
+                                            <ul class="space-y-3">
+                                            @foreach($job_application->resume->education as $edu)
+                                                <li class="bg-gray-50 p-3 rounded border border-gray-100">
+                                                    <div class="font-semibold text-gray-800">{{ $edu['institution'] ?? ($edu['school'] ?? '') }}</div>
+                                                    @if(isset($edu['degree']))
+                                                        <div class="text-sm text-gray-600 mb-1">{{ $edu['degree'] }}</div>
+                                                    @endif
+                                                    @if(isset($edu['description']))
+                                                        <div class="text-xs text-gray-500 mt-1">{{ $edu['description'] }}</div>
+                                                    @endif
+                                                </li>
+                                            @endforeach
+                                            </ul>
+                                        @elseif(is_string($job_application->resume?->education))
+                                            {{ $job_application->resume->education }}
                                         @else
-                                            {{ $job_application->resume->education ?? '—' }}
+                                            —
                                         @endif
                                     </td>
                                 </tr>
-        
+    
                         </tbody>
                     </table>
                 </div>
